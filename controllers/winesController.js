@@ -41,7 +41,6 @@ export const deleteWineById = async( req, res) => {
                 message: `Vino con id ${wineId} non trovato.`,
             })
         }
-        console.log(wineToDelete);
         res.status(200).send({
             statusCode: 200,
             message: `Vino con id ${wineId} eliminato correttamente.`
