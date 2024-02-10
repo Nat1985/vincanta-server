@@ -5,6 +5,7 @@ export const addNewWine = async (req, res) => {
         const newWine = new WineModel({
             country: req.body.country,
             region: req.body.region,
+            city: req.body.city,
             company: req.body.company,
             type: req.body.type,
             name: req.body.name,
@@ -53,4 +54,9 @@ export const deleteWineById = async( req, res) => {
             error: error
         })
     }
+}
+
+export const getAllWines = async (req, res) => {
+    const wines = await WineModel.find();
+    //
 }
