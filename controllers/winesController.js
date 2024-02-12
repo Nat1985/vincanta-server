@@ -6,7 +6,7 @@ export const addNewWine = async (req, res) => {
             country: req.body.country,
             region: req.body.region,
             city: req.body.city,
-            company: req.body.company,
+            company: req.body.company.strip(),
             type: req.body.type,
             name: req.body.name,
             year: req.body.year,
