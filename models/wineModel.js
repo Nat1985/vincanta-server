@@ -20,7 +20,7 @@ const WineModelSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enmu: ['rosso', 'bianco', 'rosé']
+        enum: ['red', 'white', 'rosé', 'bubbles']
     },
     name: {
         type: String,

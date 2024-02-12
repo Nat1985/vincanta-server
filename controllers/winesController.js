@@ -32,11 +32,11 @@ export const addNewWine = async (req, res) => {
     }
 };
 
-export const deleteWineById = async( req, res) => {
+export const deleteWineById = async (req, res) => {
     const { wineId } = req.body;
     try {
         const wineToDelete = await WineModel.findByIdAndDelete(wineId);
-        if(!wineToDelete) {
+        if (!wineToDelete) {
             return res.status(404).send({
                 statusCode: 404,
                 message: `Vino con id ${wineId} non trovato.`,
@@ -56,7 +56,82 @@ export const deleteWineById = async( req, res) => {
     }
 }
 
+/* export const getAllWines = async (req, res) => {
+    try {
+        const wines = await WineModel.find();
+        res.status(200).send({
+            statusCode: 200,
+            payload: wines
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
+} */
+
 export const getAllWines = async (req, res) => {
-    const wines = await WineModel.find();
-    //
-}
+    try {
+        const wines = await WineModel.find();
+
+        // Raggruppa i vini per regione e azienda
+        const groupedWines = wines.reduce((result, wine) => {
+            const regionName = wine.region;
+            const companyName = wine.company;
+
+            // Se la regione non è presente nell'oggetto raggruppato, aggiungila
+            if (!result[regionName]) {
+                result[regionName] = {
+                    region: regionName,
+                    data: []
+                };
+            }
+
+            // Trova l'oggetto della regione corrente
+            const regionObject = result[regionName];
+
+            // Cerca l'oggetto azienda corrente nell'array data della regione
+            let companyObject = regionObject.data.find(obj => obj.company === companyName);
+
+            // Se l'azienda non è presente, aggiungila
+            if (!companyObject) {
+                companyObject = {
+                    company: companyName,
+                    data: []
+                };
+                regionObject.data.push(companyObject);
+            }
+
+            // Aggiungi il vino all'array dell'azienda nella regione
+            companyObject.data.push(wine);
+
+            return result;
+        }, {});
+
+        // Trasforma l'oggetto raggruppato in un array di oggetti
+        const groupedWinesArray = Object.values(groupedWines);
+
+        // Ordina l'array di oggetti in base al nome della regione (in ordine alfabetico)
+        groupedWinesArray.sort((a, b) => a.region.localeCompare(b.region));
+
+        // Ordina anche gli array di oggetti azienda all'interno di ogni regione
+        groupedWinesArray.forEach(region => {
+            region.data.sort((a, b) => a.company.localeCompare(b.company));
+        });
+
+        res.status(200).send({
+            statusCode: 200,
+            payload: groupedWinesArray
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        });
+    }
+};
