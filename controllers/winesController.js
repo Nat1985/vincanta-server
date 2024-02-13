@@ -56,12 +56,20 @@ export const deleteWineById = async (req, res) => {
     }
 }
 
-/* export const getAllWines = async (req, res) => {
+export const getWineById = async (req, res) => {
+    const { wineId } = req.query;
     try {
-        const wines = await WineModel.find();
+        const wine = await WineModel.findById(wineId);
+        if (!wine) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: `Nessun prodotto trovato con id ${wineId}.`
+            })
+        }
         res.status(200).send({
             statusCode: 200,
-            payload: wines
+            message: 'Prodotto trovato.',
+            payload: wine
         })
     } catch (error) {
         console.log(error);
@@ -71,7 +79,36 @@ export const deleteWineById = async (req, res) => {
             error: error
         })
     }
-} */
+}
+
+export const editWineById = async (req, res) => {
+    const { id, data } = req.body;
+    try {
+        const updatedWine = await WineModel.findByIdAndUpdate(
+            id,
+            data,
+            { new: true }
+        );
+        if (!updatedWine) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: `Nessun prodotto trovato con id ${id}`
+            })
+        };
+        res.status(200).send({
+            statusCode: 200,
+            message: `Prodotto con id ${id} modificato correttamente.`,
+            payload: updatedWine
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
+}
 
 export const getAllWines = async (req, res) => {
     try {
