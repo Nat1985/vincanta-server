@@ -1,12 +1,13 @@
 import { WineModel } from "../models/wineModel.js";
 
 export const addNewWine = async (req, res) => {
+    const trimCompany = req.body.company.trim();
     try {
         const newWine = new WineModel({
             country: req.body.country,
             region: req.body.region,
             city: req.body.city,
-            company: req.body.company.strip(),
+            company: trimCompany,
             type: req.body.type,
             name: req.body.name,
             year: req.body.year,
