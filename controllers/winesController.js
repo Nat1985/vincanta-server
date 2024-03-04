@@ -2,17 +2,20 @@ import { WineModel } from "../models/wineModel.js";
 
 export const addNewWine = async (req, res) => {
     const trimCompany = req.body.company.trim();
+    const isChampagne = req.body.type === 'champagne' ? true : false;
     try {
         const newWine = new WineModel({
-            country: req.body.country,
+            country: isChampagne ? 'Champagne' : req.body.country,
             region: req.body.region,
             city: req.body.city,
             company: trimCompany,
             type: req.body.type,
             name: req.body.name,
             year: req.body.year,
+            volume: req.body.volume,
             tablePrice: req.body.tablePrice,
             takeAwayPrice: req.body.takeAwayPrice,
+            award: req.body.award,
             description: req.body.description,
             favourite: req.body.favourite,
             available: req.body.available,
@@ -115,23 +118,35 @@ export const getAllWines = async (req, res) => {
     try {
         const wines = await WineModel.find();
 
-        // Raggruppa i vini per regione e azienda
+        // Raggruppa i vini per nazione, regione e azienda
         const groupedWines = wines.reduce((result, wine) => {
+            const countryName = wine.country;
             const regionName = wine.region;
             const companyName = wine.company;
 
-            // Se la regione non è presente nell'oggetto raggruppato, aggiungila
-            if (!result[regionName]) {
-                result[regionName] = {
-                    region: regionName,
+            // Se la nazione non è presente nell'oggetto raggruppato, aggiungila
+            if (!result[countryName]) {
+                result[countryName] = {
+                    country: countryName,
                     data: []
                 };
             }
 
-            // Trova l'oggetto della regione corrente
-            const regionObject = result[regionName];
+            // Trova l'oggetto della nazione corrente
+            const countryObject = result[countryName];
 
-            // Cerca l'oggetto azienda corrente nell'array data della regione
+            // Se la regione non è presente nell'array data della nazione, aggiungila
+            let regionObject = countryObject.data.find(obj => obj.region === regionName);
+
+            if (!regionObject) {
+                regionObject = {
+                    region: regionName,
+                    data: []
+                };
+                countryObject.data.push(regionObject);
+            }
+
+            // Trova l'oggetto azienda corrente nell'array data della regione
             let companyObject = regionObject.data.find(obj => obj.company === companyName);
 
             // Se l'azienda non è presente, aggiungila
@@ -152,12 +167,15 @@ export const getAllWines = async (req, res) => {
         // Trasforma l'oggetto raggruppato in un array di oggetti
         const groupedWinesArray = Object.values(groupedWines);
 
-        // Ordina l'array di oggetti in base al nome della regione (in ordine alfabetico)
-        groupedWinesArray.sort((a, b) => a.region.localeCompare(b.region));
+        // Ordina l'array di oggetti in base al nome della nazione (in ordine alfabetico)
+        groupedWinesArray.sort((a, b) => a.country.localeCompare(b.country));
 
-        // Ordina anche gli array di oggetti azienda all'interno di ogni regione
-        groupedWinesArray.forEach(region => {
-            region.data.sort((a, b) => a.company.localeCompare(b.company));
+        // Ordina anche gli array di oggetti regione e azienda all'interno di ogni nazione
+        groupedWinesArray.forEach(country => {
+            country.data.forEach(region => {
+                region.data.sort((a, b) => a.company.localeCompare(b.company));
+            });
+            country.data.sort((a, b) => a.region.localeCompare(b.region));
         });
 
         res.status(200).send({
