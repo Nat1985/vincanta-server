@@ -16,6 +16,7 @@ export const addNewWine = async (req, res) => {
             tablePrice: req.body.tablePrice,
             takeAwayPrice: req.body.takeAwayPrice,
             award: req.body.award,
+            sboccatura: req.body.sboccatura,
             description: req.body.description,
             favourite: req.body.favourite,
             available: req.body.available,
@@ -116,7 +117,15 @@ export const editWineById = async (req, res) => {
 
 export const getAllWines = async (req, res) => {
     try {
-        const wines = await WineModel.find();
+        let query = {};
+        if (req.query.type === '') {
+            query = {};
+        } else {
+            const typeValue = req.query.type;
+            query = { type: typeValue };
+        }    
+
+        const wines = await WineModel.find(query);
 
         // Raggruppa i vini per nazione, regione e azienda
         const groupedWines = wines.reduce((result, wine) => {
@@ -191,3 +200,4 @@ export const getAllWines = async (req, res) => {
         });
     }
 };
+

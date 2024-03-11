@@ -1,9 +1,9 @@
 import { WineModel } from "../models/wineModel.js"
 
-// Inserisce un nuovo tag a tutti gli oggetti. Key e value attuali: volume e 750
+// Inserisce un nuovo tag a tutti gli oggetti. Key e value attuali: sboccatura e false
 export const insertVolumeTag = async (req, res) => {
     try {
-        const allWines = await WineModel.updateMany({}, { $set: { country: 'Italia' } })
+        const allWines = await WineModel.updateMany({}, { $set: { sboccatura: false } })
         res.status(200).send({
             statusCode: 200,
             message: "Il tag è stato aggiunto a tutti gli oggetti"

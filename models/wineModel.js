@@ -20,7 +20,7 @@ const WineModelSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['red', 'white', 'rosé', 'bubbles', 'dessert', 'champagne']
+        enum: ['red', 'white', 'rosé', 'bubbles', 'bubbles-rosé', 'dessert', 'champagne', 'champagne-rosé']
     },
     volume: {
         type: String,
@@ -54,6 +54,11 @@ const WineModelSchema = new mongoose.Schema({
         default: false
     },
     award: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    sboccatura: {
         type: Boolean,
         required: false,
         default: false
