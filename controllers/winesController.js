@@ -117,9 +117,7 @@ export const editWineById = async (req, res) => {
 
 export const getAllWines = async (req, res) => {
     const { type, search, favourites } = req.query;
-    console.log('type: ', type);
-    console.log('search: ', search);
-    console.log('favourites: ', favourites);
+
     // Controlla se è presente type o search
     let filter = {};
     if (type) filter = { type: type };
