@@ -116,16 +116,22 @@ export const editWineById = async (req, res) => {
 }
 
 export const getAllWines = async (req, res) => {
-    try {
-        let query = {};
-        if (req.query.type === '') {
-            query = {};
-        } else {
-            const typeValue = req.query.type;
-            query = { type: typeValue };
-        }    
+    const { search } = req.query;
 
-        const wines = await WineModel.find(query);
+    let query = {};
+    if (req.query.type === '') {
+        query = {};
+    } else {
+        const typeValue = req.query.type;
+        query = { type: typeValue };
+    }
+    try {
+        let wines;
+        if (search) {
+            wines = await WineModel.find({ name: { $regex: search, $options: 'i'}})
+        } else {
+            wines = await WineModel.find(query)
+        }
 
         // Raggruppa i vini per nazione, regione e azienda
         const groupedWines = wines.reduce((result, wine) => {
