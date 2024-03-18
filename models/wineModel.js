@@ -7,7 +7,7 @@ const WineModelSchema = new mongoose.Schema({
     },
     region: {
         type: String,
-        required: true
+        required: false
     },
     city: {
         type: String,

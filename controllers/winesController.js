@@ -211,12 +211,14 @@ export const getAllWines = async (req, res) => {
 
         // Suddividi l'array in tre parti: Italia, Francia (incl. Champagne) e tutte le altre nazioni
         let italy = groupedWinesArray.find(item => item.country.toLowerCase() === 'italia');
-        let france = groupedWinesArray.find(item => item.country.toLowerCase() === 'francia' || item.country.toLowerCase() === 'champagne');
-        let otherCountries = groupedWinesArray.filter(item => item !== italy && item !== france);
+        let france = groupedWinesArray.find(item => item.country.toLowerCase() === 'francia');
+        let champagne = groupedWinesArray.find(item => item.country.toLowerCase() === 'champagne');
+        let otherCountries = groupedWinesArray.filter(item => item !== italy && item !== france && item !== champagne);
 
         // Ordina le tre parti separatamente
         if (italy) italy.data.sort((a, b) => a.region.localeCompare(b.region));
         if (france) france.data.sort((a, b) => a.region.localeCompare(b.region));
+        if (champagne) champagne.data.sort((a, b) => a.region.localeCompare(b.region));
         if (otherCountries.length > 0) {
             otherCountries.sort((a, b) => a.country.localeCompare(b.country));
             otherCountries.forEach(country => {
@@ -231,6 +233,7 @@ export const getAllWines = async (req, res) => {
         groupedWinesArray = [];
         if (italy) groupedWinesArray.push(italy);
         if (france) groupedWinesArray.push(france);
+        if (champagne) groupedWinesArray.push(champagne);
         groupedWinesArray = groupedWinesArray.concat(otherCountries);
 
         // Ordina l'array di oggetti in base al nome della nazione (in ordine alfabetico)
