@@ -59,9 +59,16 @@ const WineModelSchema = new mongoose.Schema({
         default: false
     },
     sboccatura: {
-        type: Boolean,
-        required: false,
-        default: false
+        isTrue: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        date: {
+            type: String,
+            required: false,
+            default: ''
+        }
     },
     available: {
         type: Boolean,

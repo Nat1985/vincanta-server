@@ -1,9 +1,9 @@
 import express from 'express';
 
-import { insertVolumeTag } from '../controllers/fixController.js';
+import { insertNewTag } from '../controllers/fixController.js';
 
 const fixRoute = express.Router();
 
-fixRoute.get("/insert-volume-tag", insertVolumeTag);
+fixRoute.get("/insert-new-tag", insertNewTag);
 
 export default fixRoute;
