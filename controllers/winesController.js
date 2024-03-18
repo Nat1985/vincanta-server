@@ -146,7 +146,14 @@ export const getAllWines = async (req, res) => {
     // Controlla se è presente type o search
     let filter = {};
     if (type) filter = { type: type };
-    if (search) filter = { name: { $regex: search, $options: 'i' } };
+    if (search) {
+        filter = {
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } }
+            ]
+        };
+    }
     if (favourites) filter = { favourite: true };
 
     try {
