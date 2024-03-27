@@ -4,6 +4,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import winesRoute from './routes/winesRoutes.js';
 import fixRoute from './routes/fixRoutes.js';
+import debugRoute from './routes/debugRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors());
 // Routes import
 app.use('/wines', winesRoute);
 app.use('/fix', fixRoute);
+app.use('/debug', debugRoute);
 
 // Server MongoDb Connect
 mongoose.connect(process.env.MONGODB_URL);

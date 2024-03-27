@@ -2,7 +2,7 @@ import { WineModel } from "../models/wineModel.js";
 
 export const addNewWine = async (req, res) => {
     const trimCompany = req.body.company.trim();
-    const isChampagne = req.body.type === 'champagne' ? true : false;
+    const isChampagne = req.body.type === 'champagne' || req.body.type === 'champagne-rosé' ? true : false;
     try {
         const newWine = new WineModel({
             country: isChampagne ? 'Champagne' : req.body.country,
@@ -91,6 +91,9 @@ export const getWineById = async (req, res) => {
 
 export const editWineById = async (req, res) => {
     const { id, data } = req.body;
+    if (data.type === 'champagne' || data.type === 'champagne-rosé') {
+        data.country = 'Champagne'
+    }
 
     // Combino le voci sboccatura e sboccaturaDate in un unico oggetto
     const { sboccatura, sboccaturaDate, ...rest } = data;
