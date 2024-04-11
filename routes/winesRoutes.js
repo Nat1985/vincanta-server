@@ -1,5 +1,5 @@
 import express from 'express';
-import { addNewWine, deleteWineById, editWineById, getAllWines, getWineById } from "../controllers/winesController.js";
+import { addNewWine, countWines, deleteWineById, editWineById, getAllWines, getWineById } from "../controllers/winesController.js";
 
 const winesRoute = express.Router();
 
@@ -8,5 +8,6 @@ winesRoute.delete('/delete-wine', deleteWineById);
 winesRoute.get('/get-all-wines', getAllWines);
 winesRoute.get('/get-wine', getWineById);
 winesRoute.patch('/edit-wine', editWineById);
+winesRoute.get("/count-wines", countWines);
 
 export default winesRoute;

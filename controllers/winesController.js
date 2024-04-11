@@ -143,6 +143,23 @@ export const editWineById = async (req, res) => {
         }
 }
 
+export const countWines = async (req, res) => {
+    try {
+        const wineCounter = await WineModel.estimatedDocumentCount({});
+        res.status(200).send({
+            statusCode: 200,
+            payload: wineCounter
+        })
+    } catch (error) {
+        console.log(error);
+            res.status(500).send({
+                statusCode: 500,
+                message: 'Internal Server Error',
+                error: error
+            })
+    }
+}
+
 export const getAllWines = async (req, res) => {
     const { type, search, favourites } = req.query;
 
