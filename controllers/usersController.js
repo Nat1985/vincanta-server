@@ -69,7 +69,7 @@ export const login = async (req, res) => {
             res.status(200).send({
                 statusCode: 200,
                 message: "Login effettuato con successo",
-                payload: { token, userData }
+                payload: token
             })
         } else {
             res.status(401).send({
@@ -172,24 +172,17 @@ export const setNewPassword = async (req, res) => {
 }
 
 export const verifyAndRefreshToken = async (req, res) => {
-    const { id, token } = req.body;
+    const { token } = req.body;
     try {
-        //Controllo che esiste l'utente
-        const user = await UserModel.findById(id);
-        if (!user) {
-            return res.status(404).send({
-                statusCode: 404,
-                message: "Utente non presente, token non valido."
-            })
-        }
         // verifico che il token sia valido
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         if (decodedToken) {
-            // verifico che non sia associato all'utente corretto
-            if (user._id.toString() !== id) {
+            // verifico che esista un utente con quell'id
+            const user = await UserModel.findById(decodedToken.id);
+            if (!user) {
                 return res.status(401).send({
-                    statusCode: 401,
-                    message: "Utente non autorizzato, token non valido."
+                    statusCode: 404,
+                    message: "Utente non trovato, token non valido."
                 })
             }
             // Verifico che sia un token di login
@@ -217,11 +210,11 @@ export const verifyAndRefreshToken = async (req, res) => {
             const userData = {
                 id: user._id,
                 email: user.email
-            };
+            }
             res.status(200).send({
                 statusCode: 200,
                 message: "Sessione autorizzata. Token aggiornato.",
-                payload: { newToken, userData }
+                payload: newToken, 
             })
         }
     } catch (error) {
