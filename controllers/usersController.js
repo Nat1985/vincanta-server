@@ -46,6 +46,7 @@ export const addNewUser = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+    console.log('login')
     const { email } = req.body;
     const lowerEmail = email.toLowerCase();
     try {
@@ -62,10 +63,6 @@ export const login = async (req, res) => {
                 email: user.email,
                 action: 'login'
             }, process.env.JWT_SECRET, { expiresIn: '24h' });
-            const userData = {
-                id: user._id,
-                email: user.email
-            };
             res.status(200).send({
                 statusCode: 200,
                 message: "Login effettuato con successo",
@@ -192,37 +189,31 @@ export const verifyAndRefreshToken = async (req, res) => {
                     message: 'Token non idoneo.'
                 })
             }
-            // verifico che non sia scaduto
-            const currentTime = Date.now() / 1000;
-            if (decodedToken.exp < currentTime) {
-                return res.status(400).send({
-                    statusCode: 400,
-                    message: "Token scaduto"
-                })
-            }
-
             // creo un nuovo token da mandare in frontend e sostituirlo
             const newToken = jwt.sign({
                 id: user._id,
                 email: user.email,
                 action: 'login'
             }, process.env.JWT_SECRET, { expiresIn: '24h' });
-            const userData = {
-                id: user._id,
-                email: user.email
-            }
             res.status(200).send({
                 statusCode: 200,
                 message: "Sessione autorizzata. Token aggiornato.",
-                payload: newToken, 
+                payload: newToken,
             })
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            statusCode: 500,
-            message: "Internal Server Error",
-            error: error
-        })
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).send({
+                statusCode: 401,
+                message: "Token scaduto, Effettua nuovamente l'accesso"
+            })
+        } else {
+            console.error(error);
+            res.status(500).send({
+                statusCode: 500,
+                message: "Internal Server Error",
+                error: error
+            })
+        }
     }
 }
