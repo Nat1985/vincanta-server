@@ -161,7 +161,11 @@ export const countWines = async (req, res) => {
 }
 
 export const getAllWines = async (req, res) => {
+    console.log('req.query: ', req.query);
     const { type, search, favourites } = req.query;
+    console.log('type: ', type);
+    console.log('search: ', search);
+    console.log('favourites: ', favourites);
 
     // Controlla se è presente type o search
     let filter = {};
