@@ -238,6 +238,7 @@ export const getAllWines = async (req, res) => {
 
             // Aggiungo il vino all'array dell'azienda nella regione
             companyObject.data.push(wine);
+            regionObject.data.sort((a, b) => a.company.localeCompare(b.company));
 
             return result;
         }, {});
