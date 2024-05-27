@@ -9,6 +9,10 @@ const WineModelSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    champagneCategory : {
+        type: String,
+        required: false
+    },
     city: {
         type: String,
         required: true

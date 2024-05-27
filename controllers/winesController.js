@@ -7,6 +7,7 @@ export const addNewWine = async (req, res) => {
         const newWine = new WineModel({
             country: isChampagne ? 'Champagne' : req.body.country,
             region: req.body.region,
+            champagneCategory: isChampagne ? (req.body.champagneCategory ? req.body.champagneCategory : null) : null,
             city: req.body.city,
             company: trimCompany,
             type: req.body.type,
