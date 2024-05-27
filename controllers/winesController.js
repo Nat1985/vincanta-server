@@ -116,31 +116,31 @@ export const editWineById = async (req, res) => {
         };
     }
 
-        try {
-            const updatedWine = await WineModel.findByIdAndUpdate(
-                id,
-                updatedData,
-                { new: true }
-            );
-            if (!updatedWine) {
-                return res.status(404).send({
-                    statusCode: 404,
-                    message: `Nessun prodotto trovato con id ${id}`
-                })
-            };
-            res.status(200).send({
-                statusCode: 200,
-                message: `Prodotto con id ${id} modificato correttamente.`,
-                payload: updatedWine
+    try {
+        const updatedWine = await WineModel.findByIdAndUpdate(
+            id,
+            updatedData,
+            { new: true }
+        );
+        if (!updatedWine) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: `Nessun prodotto trovato con id ${id}`
             })
-        } catch (error) {
-            console.log(error);
-            res.status(500).send({
-                statusCode: 500,
-                message: 'Internal Server Error',
-                error: error
-            })
-        }
+        };
+        res.status(200).send({
+            statusCode: 200,
+            message: `Prodotto con id ${id} modificato correttamente.`,
+            payload: updatedWine
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
 }
 
 export const countWines = async (req, res) => {
@@ -152,22 +152,26 @@ export const countWines = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-            res.status(500).send({
-                statusCode: 500,
-                message: 'Internal Server Error',
-                error: error
-            })
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
     }
 }
 
 export const getAllWines = async (req, res) => {
-    console.log('req.query: ', req.query);
-    const { type, search, favourites } = req.query;
-    console.log('type: ', type);
-    console.log('search: ', search);
-    console.log('favourites: ', favourites);
+    const { type, search, favourites, from, to } = req.query;
 
-    // Controlla se è presente type o search
+    // Fixo il valore di frome to
+    let fromRange = from === 'undefined' ? '' : from;
+    let toRange = to === 'undefined' ? '' : to;
+    if (fromRange || toRange) {
+        fromRange = fromRange ? parseInt(fromRange) : 0;
+        toRange = toRange ? parseInt(toRange) : Infinity;
+    }
+
+    // Controllo se è presente type o search
     let filter = {};
     if (type) filter = { type: type };
     if (search) {
@@ -184,13 +188,21 @@ export const getAllWines = async (req, res) => {
 
         const wines = await WineModel.find(filter)
 
-        // Raggruppa i vini per nazione, regione e azienda
+        // Raggruppo i vini per nazione, regione e azienda
         const groupedWines = wines.reduce((result, wine) => {
             const countryName = wine.country;
             const regionName = wine.region;
             const companyName = wine.company;
+            const { tablePrice, takeAwayPrice } = wine;
 
-            // Se la nazione non è presente nell'oggetto raggruppato, aggiungila
+            // Controllo del range di prezzo
+            if ((fromRange !== '' && toRange !== '') && 
+                (tablePrice < fromRange || tablePrice > toRange) && 
+                (takeAwayPrice < fromRange || takeAwayPrice > toRange)) {
+                return result; // skippa il vino se non soddisfa i criteri
+            }
+
+            // Se la nazione non è presente nell'oggetto raggruppato, la aggiungo
             if (!result[countryName]) {
                 result[countryName] = {
                     country: countryName,
@@ -198,10 +210,10 @@ export const getAllWines = async (req, res) => {
                 };
             }
 
-            // Trova l'oggetto della nazione corrente
+            // Trovo l'oggetto della nazione corrente
             const countryObject = result[countryName];
 
-            // Se la regione non è presente nell'array data della nazione, aggiungila
+            // Se la regione non è presente nell'array data della nazione, la aggiungo
             let regionObject = countryObject.data.find(obj => obj.region === regionName);
 
             if (!regionObject) {
@@ -212,10 +224,10 @@ export const getAllWines = async (req, res) => {
                 countryObject.data.push(regionObject);
             }
 
-            // Trova l'oggetto azienda corrente nell'array data della regione
+            // Trovo l'oggetto azienda corrente nell'array data della regione
             let companyObject = regionObject.data.find(obj => obj.company === companyName);
 
-            // Se l'azienda non è presente, aggiungila
+            // Se l'azienda non è presente, la aggiungo
             if (!companyObject) {
                 companyObject = {
                     company: companyName,
@@ -224,22 +236,22 @@ export const getAllWines = async (req, res) => {
                 regionObject.data.push(companyObject);
             }
 
-            // Aggiungi il vino all'array dell'azienda nella regione
+            // Aggiungo il vino all'array dell'azienda nella regione
             companyObject.data.push(wine);
 
             return result;
         }, {});
 
-        // Trasforma l'oggetto raggruppato in un array di oggetti
+        // Trasformo l'oggetto raggruppato in un array di oggetti
         let groupedWinesArray = Object.values(groupedWines);
 
-        // Suddividi l'array in tre parti: Italia, Francia (incl. Champagne) e tutte le altre nazioni
+        // Suddivido l'array in tre parti: Italia, Francia (incl. Champagne) e tutte le altre nazioni
         let italy = groupedWinesArray.find(item => item.country.toLowerCase() === 'italia');
         let france = groupedWinesArray.find(item => item.country.toLowerCase() === 'francia');
         let champagne = groupedWinesArray.find(item => item.country.toLowerCase() === 'champagne');
         let otherCountries = groupedWinesArray.filter(item => item !== italy && item !== france && item !== champagne);
 
-        // Ordina le tre parti separatamente
+        // Ordino le tre parti separatamente
         if (italy) italy.data.sort((a, b) => a.region.localeCompare(b.region));
         if (france) france.data.sort((a, b) => a.region.localeCompare(b.region));
         if (champagne) champagne.data.sort((a, b) => a.region.localeCompare(b.region));
@@ -253,23 +265,12 @@ export const getAllWines = async (req, res) => {
             });
         }
 
-        // Concatena le tre parti nell'ordine desiderato
+        // Concateno le tre parti nell'ordine desiderato
         groupedWinesArray = [];
         if (italy) groupedWinesArray.push(italy);
         if (france) groupedWinesArray.push(france);
         if (champagne) groupedWinesArray.push(champagne);
         groupedWinesArray = groupedWinesArray.concat(otherCountries);
-
-        // Ordina l'array di oggetti in base al nome della nazione (in ordine alfabetico)
-        // groupedWinesArray.sort((a, b) => a.country.localeCompare(b.country));
-
-        // Ordina anche gli array di oggetti regione e azienda all'interno di ogni nazione
-        // groupedWinesArray.forEach(country => {
-        //     country.data.forEach(region => {
-        //         region.data.sort((a, b) => a.company.localeCompare(b.company));
-        //     });
-        //     country.data.sort((a, b) => a.region.localeCompare(b.region));
-        // });
 
         res.status(200).send({
             statusCode: 200,
