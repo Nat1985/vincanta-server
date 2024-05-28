@@ -6,6 +6,7 @@ import winesRoute from './routes/winesRoutes.js';
 import usersRoute from './routes/usersRoutes.js';
 import fixRoute from './routes/fixRoutes.js';
 import debugRoute from './routes/debugRoutes.js';
+import foodRoute from './routes/foodRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors());
 
 // Routes import
 app.use('/wines', winesRoute);
+app.use('/food', foodRoute);
 app.use('/users', usersRoute);
 app.use('/fix', fixRoute);
 app.use('/debug', debugRoute);
