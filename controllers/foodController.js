@@ -1,9 +1,10 @@
 import { FoodModel } from "../models/foodModel.js";
 
 export const AddNewFood = async (req, res) => {
-    const { course, price, allergens, notes } = req.body;
+    const { name, course, price, allergens, notes } = req.body;
     try {
         const newFood = new FoodModel({
+            name: name,
             course: course,
             price: price,
             allergens: allergens ? allergens : null,
