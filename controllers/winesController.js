@@ -162,11 +162,20 @@ export const countWines = async (req, res) => {
 }
 
 export const getAllWines = async (req, res) => {
-    const { type, search, favourites, from, to } = req.query;
-
+    const { type, search, favourites, from, to, option } = req.query;
     // Fixo il valore di frome to
-    let fromRange = from === 'undefined' ? '' : from;
-    let toRange = to === 'undefined' ? '' : to;
+    let fromRange = from === 'undefined' ? '' : parseInt(from);
+    let toRange = to === 'undefined' ? '' : parseInt(to);
+    /* let fixedOption = option === 'undefined' ? '' : (option === 'Tavolo' ); */
+    let fixedOption;
+    if (option === 'undefined') {
+        fixedOption = '';
+    } else if (option === 'Tavolo') {
+        fixedOption = 'tablePrice'
+    } else if (option === 'Asporto') {
+        fixedOption = 'takeAwayPrice'
+    }
+
     if (fromRange || toRange) {
         fromRange = fromRange ? parseInt(fromRange) : 0;
         toRange = toRange ? parseInt(toRange) : Infinity;
@@ -189,19 +198,22 @@ export const getAllWines = async (req, res) => {
 
         const wines = await WineModel.find(filter)
 
+        // Filtro i vini per range di prezzo
+        console.log('fromRange: ', fromRange);
+        console.log('toRange: ', toRange);
+        console.log('fixedOption:', fixedOption);
+        let rangedWines = [...wines];
+        if(option) { // Se c'è option vuol dire che il range è settato
+            rangedWines = wines.filter(element => element[fixedOption] >= fromRange && element[fixedOption] <= toRange) 
+        }
+        console.log('rangedWines.length', rangedWines.length);
+
         // Raggruppo i vini per nazione, regione e azienda
-        const groupedWines = wines.reduce((result, wine) => {
+        const groupedWines = rangedWines.reduce((result, wine) => {
             const countryName = wine.country;
             const regionName = wine.region;
             const companyName = wine.company;
             const { tablePrice, takeAwayPrice } = wine;
-
-            // Controllo del range di prezzo
-            if ((fromRange !== '' && toRange !== '') && 
-                (tablePrice < fromRange || tablePrice > toRange) && 
-                (takeAwayPrice < fromRange || takeAwayPrice > toRange)) {
-                return result; // skippa il vino se non soddisfa i criteri
-            }
 
             // Se la nazione non è presente nell'oggetto raggruppato, la aggiungo
             if (!result[countryName]) {
