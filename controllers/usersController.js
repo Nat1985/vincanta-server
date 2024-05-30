@@ -92,7 +92,7 @@ export const resetPasswordRequest = async (req, res) => {
         if (!user) {
             return res.status(404).send({
                 statusCode: 404,
-                message: `Nome utente o password non validi.`
+                message: `Email non trovata.`
             })
         };
         const resetPasswordToken = jwt.sign({
