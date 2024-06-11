@@ -199,14 +199,10 @@ export const getAllWines = async (req, res) => {
         const wines = await WineModel.find(filter)
 
         // Filtro i vini per range di prezzo
-        /* console.log('fromRange: ', fromRange);
-        console.log('toRange: ', toRange);
-        console.log('fixedOption:', fixedOption); */
         let rangedWines = [...wines];
         if(option) { // Se c'è option vuol dire che il range è settato
             rangedWines = wines.filter(element => element[fixedOption] >= fromRange && element[fixedOption] <= toRange) 
         }
-        /* console.log('rangedWines.length', rangedWines.length); */
 
         // Raggruppo i vini per nazione, regione e azienda
         const groupedWines = rangedWines.reduce((result, wine) => {
@@ -251,10 +247,26 @@ export const getAllWines = async (req, res) => {
 
             // Aggiungo il vino all'array dell'azienda nella regione
             companyObject.data.push(wine);
+            // Riordino ogni volta per prezzo i vini all'interno dell'azienda
+            companyObject.data.sort((a, b) => a.tablePrice - b.tablePrice);
+            // Riordino ogni volta in ordine alfabetico le aziende all'interno della regione
             regionObject.data.sort((a, b) => a.company.localeCompare(b.company));
 
             return result;
         }, {});
+
+        // Faccio gli ordinamenti al di fuori del ciclo, quindi solo alla fine
+        // E' più efficiente, rispetto alle ultime due righe all'interno del ciclo. Da testare:
+        /* Object.values(groupedWines).forEach(countryObject => {
+            countryObject.data.forEach(regionObject => {
+                regionObject.data.forEach(companyObject => {
+                    companyObject.data.sort((a, b) => a.tablePrice - b.tablePrice);
+                });
+                regionObject.data.sort((a, b) => a.company.localeCompare(b.company));
+            });
+        }); */
+        //
+        //
 
         // Trasformo l'oggetto raggruppato in un array di oggetti
         let groupedWinesArray = Object.values(groupedWines);
