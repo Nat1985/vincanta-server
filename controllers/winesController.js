@@ -199,14 +199,14 @@ export const getAllWines = async (req, res) => {
         const wines = await WineModel.find(filter)
 
         // Filtro i vini per range di prezzo
-        console.log('fromRange: ', fromRange);
+        /* console.log('fromRange: ', fromRange);
         console.log('toRange: ', toRange);
-        console.log('fixedOption:', fixedOption);
+        console.log('fixedOption:', fixedOption); */
         let rangedWines = [...wines];
         if(option) { // Se c'è option vuol dire che il range è settato
             rangedWines = wines.filter(element => element[fixedOption] >= fromRange && element[fixedOption] <= toRange) 
         }
-        console.log('rangedWines.length', rangedWines.length);
+        /* console.log('rangedWines.length', rangedWines.length); */
 
         // Raggruppo i vini per nazione, regione e azienda
         const groupedWines = rangedWines.reduce((result, wine) => {
