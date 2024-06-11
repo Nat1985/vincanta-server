@@ -21,6 +21,7 @@ export const addNewWine = async (req, res) => {
                 isTrue: req.body.sboccatura,
                 date: req.body.sboccaturaDate
             },
+            isGoodValue: req.body.isGoodValue,
             description: req.body.description,
             favourite: req.body.favourite,
             available: req.body.available,

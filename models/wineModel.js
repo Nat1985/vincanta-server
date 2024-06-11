@@ -74,6 +74,10 @@ const WineModelSchema = new mongoose.Schema({
             default: ''
         }
     },
+    isGoodValue: {
+        type: Boolean,
+        required: false
+    },
     available: {
         type: Boolean,
         required: false,
