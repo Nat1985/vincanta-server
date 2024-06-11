@@ -1,13 +1,14 @@
 import { FoodModel } from "../models/foodModel.js";
 
 export const AddNewFood = async (req, res) => {
-    const { name, course, price, allergens, notes } = req.body;
+    const { name, course, price, allergens, isFrozen, notes } = req.body;
     try {
         const newFood = new FoodModel({
             name: name,
             course: course,
             price: price,
             allergens: allergens ? allergens : null,
+            isFrozen: isFrozen,
             notes: notes ? notes : null
         })
         const food = await newFood.save();
@@ -79,6 +80,7 @@ export const editFood = async (req, res) => {
                     course: req.body.course,
                     price: req.body.price,
                     allergens: req.body.allergens,
+                    isFrozen: req.body.isFrozen,
                     notes: req.body.notes
                 },
                 { new: true }

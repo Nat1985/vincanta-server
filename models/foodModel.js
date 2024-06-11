@@ -18,6 +18,11 @@ const FoodModelSchema = new mongoose.Schema({
         type: String,
         required: false
     }],
+    isFrozen: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     notes: {
         type: String,
         required: false

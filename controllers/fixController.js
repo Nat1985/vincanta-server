@@ -1,4 +1,5 @@
-import { WineModel } from "../models/wineModel.js"
+import { WineModel } from "../models/wineModel.js";
+import { FoodModel } from "../models/foodModel.js";
 
 // Inserisce un nuovo tag a tutti gli oggetti. Key e value attuali: sboccatura e false
 export const insertNewTag = async (req, res) => {
@@ -59,6 +60,60 @@ export const updateCoteDuRhone = async (req, res) => {
             statusCode: 200,
             message: updateWines.modifiedCount + " oggetti aggiornati.",
             payload: updateWines
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
+}
+
+export const insertIsGoodValueKey = async (req, res) => {
+    try {
+        const updateWines = await WineModel.updateMany(
+            {},
+            { $set: { isGoodValue: false } }
+        );
+        if (updateWines.modifiedCount === 0) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: "Nessun vino trovato"
+            })
+        };
+        res.status(200).send({
+            statusCode: 200,
+            message: updateWines.modifiedCount + " oggetti aggiornati.",
+            payload: updateWines
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
+}
+
+export const insertIsFrozen = async (req, res) => {
+    try {
+        const updateFoods = await FoodModel.updateMany(
+            {},
+            { $set: { isFrozen: false } }
+        );
+        if (updateFoods.modifiedCount === 0) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: "Nessun vino trovato"
+            })
+        };
+        res.status(200).send({
+            statusCode: 200,
+            message: updateFoods.modifiedCount + " oggetti aggiornati.",
+            payload: updateFoods
         })
     } catch (error) {
         console.log(error);
