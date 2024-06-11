@@ -163,7 +163,7 @@ export const countWines = async (req, res) => {
 }
 
 export const getAllWines = async (req, res) => {
-    const { type, search, favourites, from, to, option } = req.query;
+    const { type, search, favourites, from, to, option, volume } = req.query;
     // Fixo il valore di frome to
     let fromRange = from === 'undefined' ? '' : parseInt(from);
     let toRange = to === 'undefined' ? '' : parseInt(to);
@@ -199,10 +199,23 @@ export const getAllWines = async (req, res) => {
 
         const wines = await WineModel.find(filter)
 
+        // Filtro i vini per 'volume'
+        let volumeWineSelection = [...wines];
+        if (volume && (
+            volume === '35 CL'||
+            volume === '50 CL'||
+            volume === '75 CL'||
+            volume === '1,5 L'||
+            volume === '3 L'||
+            volume === '5 L'
+        )) { // Se c'è 'size' (e il valore è uno di quelli dichiarati nella condizione) il valore è settato, altrimenti 'sizeWineSelection' rimane uguale a 'wines'
+            volumeWineSelection = wines.filter(element => element.volume === volume)
+        }
+
         // Filtro i vini per range di prezzo
-        let rangedWines = [...wines];
-        if(option) { // Se c'è option vuol dire che il range è settato
-            rangedWines = wines.filter(element => element[fixedOption] >= fromRange && element[fixedOption] <= toRange) 
+        let rangedWines = [...volumeWineSelection];
+        if (option) { // Se c'è option vuol dire che il range è settato
+            rangedWines = volumeWineSelection.filter(element => element[fixedOption] >= fromRange && element[fixedOption] <= toRange)
         }
 
         // Raggruppo i vini per nazione, regione e azienda
