@@ -24,6 +24,7 @@ export const addNewWine = async (req, res) => {
             isGoodValue: req.body.isGoodValue,
             description: req.body.description,
             favourite: req.body.favourite,
+            isBio: req.body.isBio,
             available: req.body.available,
         });
         const wine = await newWine.save();

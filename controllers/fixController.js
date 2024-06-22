@@ -124,3 +124,30 @@ export const insertIsFrozen = async (req, res) => {
         })
     }
 }
+
+export const insertIsBio = async (req, res) => {
+    try {
+        const updateFoods = await WineModel.updateMany(
+            {},
+            { $set: { isBio: false } }
+        );
+        if (updateFoods.modifiedCount === 0) {
+            return res.status(404).send({
+                statusCode: 404,
+                message: "Nessun vino trovato"
+            })
+        };
+        res.status(200).send({
+            statusCode: 200,
+            message: updateFoods.modifiedCount + " oggetti aggiornati.",
+            payload: updateFoods
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: error
+        })
+    }
+}
