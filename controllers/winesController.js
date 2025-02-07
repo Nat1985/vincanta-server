@@ -433,7 +433,7 @@ export const deleteImage = async (req, res) => {
                 console.log(`Immagine con 'public_id' ${public_id} non trovata`)
                 res.status(400).send({
                     statusCode: 400,
-                    message: `Immagine con 'public_id' ${public_id} non trovata`
+                    message: `Immagine non trovata.`
                 })
             }
         } catch (error) {
