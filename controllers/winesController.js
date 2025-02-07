@@ -1,4 +1,5 @@
 import { WineModel } from "../models/wineModel.js";
+import cloudinary from '../services/cloudinary.js';
 
 export const addNewWine = async (req, res) => {
     const trimCompany = req.body.company.trim();
@@ -26,6 +27,8 @@ export const addNewWine = async (req, res) => {
             favourite: req.body.favourite,
             isBio: req.body.isBio,
             available: req.body.available,
+            frontLabel: req.body.frontLabel,
+            backLabel: req.body.backLabel
         });
         const wine = await newWine.save();
         res.status(201).send({
@@ -53,6 +56,47 @@ export const deleteWineById = async (req, res) => {
                 message: `Vino con id ${wineId} non trovato.`,
             })
         }
+        // Elimino le immagini da Cloudinary
+        const imagesIdArray = [wineToDelete.frontLabel?.public_id, wineToDelete.backLabel?.public_id].filter(id => id); // Elimino gli elementi null
+        if (imagesIdArray.length > 0) {
+            console.log('here 2');
+            // Creo un array di Promise
+            const deletingResults = await Promise.all(imagesIdArray.map(async (public_id) => {
+                console.log('here 3');
+                try {
+                    const deleteResponse = await cloudinary.uploader.destroy(public_id);
+                    if (deleteResponse.result === 'ok') {
+                        return { public_id, status: 'deleted' };
+                    } else if (deleteResponse.result === 'not found') {
+                        console.log(`Immagine con public_id ${public_id} non trovata.`)
+                        return { public_id, status: 'not found' }
+                    } else {
+                        return { public_id, status: 'error' }
+                    }
+                } catch (error) {
+                    console.error(`Errore nella cancellazione dell'immagine con 'public_id' ${public_id}`)
+                    return { public_id, status: 'error' };
+                }
+            }));
+
+            const success = deletingResults.filter(result => result.status === 'deleted');
+            const notFound = deletingResults.filter(result => result.status === 'not found');
+            const errors = deletingResults.filter(result => result.status === 'error');
+
+            if (errors.length > 0) {
+                console.log('here 4');
+                return res.status(500).send({
+                    statusCode: 500,
+                    message: "Si sono verificati errori durante la cancellazione delle immagini.",
+                    results: {
+                        success,
+                        notFound,
+                        errors
+                    }
+                });
+            }
+        }
+        //
         res.status(200).send({
             statusCode: 200,
             message: `Vino con id ${wineId} eliminato correttamente.`
@@ -327,3 +371,84 @@ export const getAllWines = async (req, res) => {
     }
 };
 
+export const uploadImage = async (req, res) => {
+    const { image } = req.body;
+    const spaceOccupied = JSON.stringify(image).length;
+    console.log("Spazio occupato da gallery:", spaceOccupied, "byte");
+
+    if (image) {
+        try {
+            const uploadResponse = await cloudinary.uploader.upload(image, {
+                upload_preset: 'vincanta-wines'
+            })
+            if (uploadResponse) {
+                // get rezisedUrl
+                const photoUrl = uploadResponse.secure_url;
+                const partsOfUrl = photoUrl.split('/');
+                const baseUrl = partsOfUrl.slice(0, 6).join('/');
+                const finalUrl = partsOfUrl.slice(6, 9).join('/');
+                const resizedUrl = baseUrl + '/w_500/' + finalUrl;
+                uploadResponse.resizedUrl = resizedUrl;
+                if (uploadResponse.width < 500) {
+                    uploadResponse.resizedUrl = photoUrl
+                }
+                //
+            }
+            res.status(201).send({
+                statusCode: 201,
+                message: "New image uploaded",
+                payload: uploadResponse
+            })
+        } catch (error) {
+            console.log(error);
+            if (error.message.includes('File size too large')) {
+                res.status(400).send({
+                    statusCode: 400,
+                    message: error.message,
+                });
+            } else {
+                res.status(500).send({
+                    statusCode: 500,
+                    message: 'Internal Server Error',
+                    error: error
+                });
+            }
+        }
+    }
+}
+
+export const deleteImage = async (req, res) => {
+    console.log('deleteImage 1');
+    const { public_id } = req.body;
+    if (public_id) {
+        try {
+            const deleteResponse = await cloudinary.uploader.destroy(public_id);
+            if (deleteResponse.result === 'ok') {
+                console.log('deleteImage 2');
+                res.status(200).send({
+                    statusCode: 200,
+                    message: "Immagine cancellata con successo"
+                })
+            } else if (deleteResponse.result === 'not found') {
+                console.log(`Immagine con 'public_id' ${public_id} non trovata`)
+                res.status(400).send({
+                    statusCode: 400,
+                    message: `Immagine con 'public_id' ${public_id} non trovata`
+                })
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send({
+                statusCode: 500,
+                message: 'Internal Server Error',
+                error: error
+            });
+        }
+    } else {
+        console.log('deleteImage here 3');
+        res.status(400).send({
+            statusCode: 400,
+            message: `Nessun valore di 'public_id' passato al server.`
+        });
+    }
+}

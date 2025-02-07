@@ -87,7 +87,9 @@ const WineModelSchema = new mongoose.Schema({
         type: Boolean,
         required: false,
         default: true
-    }
+    },
+    frontLabel: Object,
+    backLabel: Object
 }, { timestamps: true, strict: 'throw' })
 
 export const WineModel = mongoose.model('WineModel', WineModelSchema, 'Wines');
